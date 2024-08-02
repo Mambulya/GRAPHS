@@ -7,7 +7,7 @@ GRAPH ALGORITHMS REALIZATION
 from stack_class import Stack
 from graph_class import Graph
 
-def dfs(start_node : Node, goal : Node):
+def dfs(start_node : int, goal : int):
     """
     поиск в глубину
     * если вершины имеют не только целочисленную характеристику, а более сложную,
@@ -24,9 +24,9 @@ def dfs(start_node : Node, goal : Node):
 
     while not next_nodes.is_empty():
         node = next_nodes.pop() # вытаскиваем из стека вершину
-        if node.key == goal: # заменить в случае *
+        if node == goal: # заменить в случае *
             return node
-        for n in node.neighbours:
+        for n in self.ad:
             if not n in explored_nodes:
                 next_nodes.push(n)
                 explored_nodes.add(n)
