@@ -14,6 +14,7 @@ vertex:
 """
 
 from stack_class import Stack
+from queue_class import Queue
 
 class Node:
     def __init__(self, index, value):
@@ -82,11 +83,9 @@ class Graph:
     def dfs(self, start_node, goal):
         """
         поиск в глубину
-        * если вершины имеют не только целочисленную характеристику, а более сложную,
-        тогда заменить start_node и end_node на класс Node, в котором будут
-        храниться все остальные характеристики
-        также стоит обратить внимание на строчку 93
-        :return:
+        :param start_node: значение вершины, с которой начинается поиск
+        :param goal: значение вершины, которое нужно найти в графе
+        :return: значение вершины
         """
         next_nodes = Stack()  # узлы, которые нужно посетить
         explored_nodes = set()  # посещенные узлы
@@ -96,18 +95,45 @@ class Graph:
 
         while not next_nodes.is_empty():
             node = next_nodes.pop()  # вытаскиваем из стека вершину
-            print("------{}-----".format(node))
+            #print("****> {}".format(node)) можно посмотреть в каком порядке отрабатываются вершины
             if node == goal:
-                print("we have found the vertex")
+                print("DFS has worked! The vertex was found:")
                 # write neighbours for check
-                print("Neighbours: ")
-                print(self.adjList[node])
+                # print("Neighbours: ")
+                # print(self.adjList[node])
                 return node
-            for n in self.adjList[node]:
-                if not n[0] in explored_nodes:
-                    next_nodes.push(n[0])
-                    explored_nodes.add(n[0])
+            for edge in self.adjList[node]:
+                if not edge[0] in explored_nodes:
+                    next_nodes.push(edge[0])
+                    explored_nodes.add(edge[0])
         return None
+
+
+    def bfs(self, start_node, goal):
+        """
+        поиск в глубину
+        :param start_node: значение вершины, с которой начинается поиск
+        :param goal: значение вершины, которое нужно найти в графе
+        :return:
+        """
+        next_nodes = Queue()
+        explored_nodes = set()
+
+        next_nodes.enque(start_node)
+        explored_nodes.add(start_node)
+
+        while not next_nodes.is_empty():
+            node = next_nodes.deque()
+            #print("---> {}".format(node)) можно посмотреть в каком порядке отрабатываются вершины
+            if node == goal:
+                print("BFS has worked! The vertex was found:")
+                return node
+            for edge in self.adjList[node]:
+                if not edge[0] in explored_nodes:
+                    next_nodes.enque(edge[0])
+                    explored_nodes.add(edge[0])
+        return None
+
 
     def __str__(self):
         """
@@ -142,12 +168,15 @@ class Graph:
 
 if __name__ == "__main__":
     my_graph = Graph(weighted=False, directed=False)
-    my_graph.addEdge("Anya", "Masha")
-    my_graph.addEdge("Anya", "Tanya")
+    my_graph.addEdge("Anya", "Diana")
+    my_graph.addEdge("Diana", "Masha")
     my_graph.addEdge("Masha", "Tanya")
     my_graph.addEdge("Tanya", "Lera")
+    my_graph.addEdge("Tanya", "Alexa")
+    my_graph.addEdge("Polina", "Alexa")
     print(my_graph)
-    print(my_graph.adjList)
     # print("*removing vertex Tanya..")
     # my_graph.removeVertex("Tanya")
+    print(my_graph.adjList)
     print(my_graph.dfs("Lera", "Anya"))
+    print(my_graph.bfs("Lera", "Anya"))

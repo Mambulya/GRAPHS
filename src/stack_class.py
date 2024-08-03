@@ -2,19 +2,19 @@
 STACK REALIZATION
 """
 
-
 class Stack():
     def __init__(self) -> None:
         self._stack = []
 
     def pop(self) -> None:
-        return self._stack.pop()
+        if len(self._stack) != 0:
+            return self._stack.pop()
 
     def push(self, elem) -> None:
         self._stack.append(elem)
 
     def is_empty(self) -> bool:
-        return self._stack == None
+        return len(self._stack) == 0
 
     def __repr__(self) -> str:
         return repr(self._stack)
