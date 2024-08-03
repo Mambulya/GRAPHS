@@ -16,10 +16,28 @@ vertex:
 from stack_class import Stack
 
 class Node:
-    def __init__(self, index, value):
-        self.index = index
-        self.value = value
+    def __init__(self, value):
+        self._index : int
+        self._value = value
+        self._in_graph : bool # есть ли вершина уже в графе
 
+    @property
+    def index(self):
+        return self._index
+
+    @index.setter
+    def set_index(self, index : int):
+        if index >= 0 and isinstance(index, int):
+            self._index = index
+
+    @property
+    def in_graph(self):
+        return self._in_graph
+
+    @in_graph.setter
+    def set_in_graph(self, flag : bool):
+        if flag == False or flag == True:
+            self._in_graph = flag
 
 class Edge:
     def __init__(self, vertex, weight):
@@ -29,36 +47,43 @@ class Edge:
 
 class Graph:
     def __init__(self, weighted:bool, directed:bool):
-        self.numV = 0
+        self.numV = -1
         self.adjList = dict()
         self.adjMatrix = list()
         self.weighted = weighted
         self.directed = directed
 
 
-    def addEdge(self, start, finish, w=None):
+    def addEdge(self, start : Node, finish : Node, w=None):
+        # проверям есть ли у вершины индекс, т.е вписана ли она уже в граф
         try:
-            self.adjList[start].append([finish, w])
-        except KeyError:
-            self.adjList[start] = []
-            self.adjList[start].append([finish, w])
+            self.adjList[start.index].append([start, finish, w])
+        except (KeyError, AttributeError):
+            # присвоить вершине новый индекс
+            self.numV += 1
+            start.index = self.numV
+            self.adjList[start.index] = []
+            self.adjList[start.index].append([start, finish, w])
 
         if not self.directed:
             try:
-                self.adjList[finish].append([start, w])
-            except KeyError:
-                self.adjList[finish] = []
-                self.adjList[finish].append([start, w])
+                self.adjList[finish.index].append([finish, start, w])
+            except (KeyError, AttributeError):
+                self.numV += 1
+                finish.index = self.numV
+                self.adjList[finish.index] = []
+                self.adjList[finish.index].append([finish, start, w])
 
 
-    def removeVertex(self, vertex):
+    def removeVertex(self, vertex : Node):
         # KeyError exception
         try:
-            del self.adjList[vertex]
-            for k, v in self.adjList.items():
-                for edge in v:
-                    if edge[0] == vertex:
-                        v.remove(edge)
+            del self.adjList[vertex.index]
+            if not self.directed: # для не ориентированного(поэтому симметричного) гарфа
+                for k, v in self.adjList.items(): # adjList - dict?
+                    for edge in v:
+                        if edge[0] == vertex:
+                            v.remove(edge)
         except KeyError:
             print("No such vertex")
 
@@ -133,13 +158,5 @@ class Graph:
                 print(self.adjMatrix[i])
 
 if __name__ == "__main__":
-    my_graph = Graph(weighted=False, directed=False)
-    my_graph.addEdge(0, 1)
-    my_graph.addEdge(0, 2)
-    my_graph.addEdge(1, 2)
-    print(my_graph)
-    print("*removing vertex 2..")
-    my_graph.removeVertex(2)
-    my_graph.toMatrix()
-    my_graph.printM()
-    print(my_graph.dfs(0, 2))
+    node = Node(1.2)
+    print(node.index)
