@@ -7,3 +7,7 @@ There are also differents algorithms on Python and C++:
 + *Dijkstra's algorithm*
 + *DFS*
 + *to be continued*...
+
+*P.S.* some books were included: 
++ "Теоретический минимум по Computer Science" В. Ф. Фило 
++ "Классические задачи Computer Science на языке Python" Дэвид Копец
