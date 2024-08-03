@@ -8,13 +8,13 @@ class Stack():
         self._stack = []
 
     def pop(self) -> None:
-        self._stack.pop()
+        return self._stack.pop()
 
     def push(self, elem) -> None:
         self._stack.append(elem)
 
     def is_empty(self) -> bool:
-        return not self._stack == None
+        return self._stack == None
 
     def __repr__(self) -> str:
         return repr(self._stack)

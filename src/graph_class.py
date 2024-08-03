@@ -6,9 +6,6 @@ matrix presentation + adjacency list presentation
 there is a toMatrix() method to transform it to the
 matrix form
 
-* If adjacency list is a dicitonary (not list) then
-Node class is not needed
-
 example (not orientated):
 vertex:
 0: 1 -> 2
@@ -19,94 +16,70 @@ vertex:
 from stack_class import Stack
 
 class Node:
-    def __init__(self, value):
-        self._index : int
+    def __init__(self, index, value):
+        self.index = index
         self.value = value
-        self._in_graph : bool # есть ли вершина уже в графе
 
-    @property
-    def index(self):
-        return self._index
-
-    @index.setter
-    def index(self, index : int):
-        if index >= 0 and isinstance(index, int):
-            self._index = index
-
-    @property
-    def in_graph(self):
-        return self._in_graph
-
-    @in_graph.setter
-    def in_graph(self, flag : bool):
-        if flag == False or flag == True:
-            self._in_graph = flag
 
 class Edge:
-    def __init__(self, vertex_start : Node, vertex_end : Node, weight):
-        self.start = vertex_start
-        self.destination = vertex_end
+    def __init__(self, vertex, weight):
+        self.destination = vertex
         self.weight = weight
 
 
 class Graph:
     def __init__(self, weighted:bool, directed:bool):
-        self.numV = -1
-        self.adjList = list()
+        self.numV = 0
+        self.adjList = dict()
         self.adjMatrix = list()
         self.weighted = weighted
         self.directed = directed
 
 
-    def addEdge(self, start : Node, finish : Node, w=None):
-        # проверям есть ли у вершины индекс, т.е вписана ли она уже в граф
+    def addEdge(self, start, finish, w=None):
         try:
-            self.adjList[start.index].append(Edge(start, finish, w))
-        except (KeyError, AttributeError):
-            # присвоить вершине новый индекс
+            self.adjList[start].append([finish, w])
+        except KeyError:
             self.numV += 1
-            start.index = self.numV
-            self.adjList[start.index] = []
-            self.adjList[start.index].append(Edge(start, finish, w))
+            self.adjList[start] = []
+            self.adjList[start].append([finish, w])
 
         if not self.directed:
             try:
-                self.adjList[finish.index].append(Edge(finish, start, w))
-            except (KeyError, AttributeError):
+                self.adjList[finish].append([start, w])
+            except KeyError:
                 self.numV += 1
-                finish.index = self.numV
-                self.adjList[finish.index] = []
-                self.adjList[finish.index].append(Edge(finish, start, w))
+                self.adjList[finish] = []
+                self.adjList[finish].append([start, w])
 
 
-    def removeVertex(self, vertex : Node):
+    def removeVertex(self, vertex):
         # KeyError exception
         try:
-            del self.adjList[vertex.index]
-            if not self.directed: # для не ориентированного(поэтому симметричного) гарфа
-                for v_index in range(len(self.adjList)):
-                    for edge in self.adjList[v_index]:
-                        if edge.destination == vertex:
-                            self.adjList[v_index].remove(edge)
+            del self.adjList[vertex]
+            for k, v in self.adjList.items():
+                for edge in v:
+                    if edge[0] == vertex:
+                        v.remove(edge)
         except KeyError:
             print("No such vertex")
-        except AttributeError:
-            print("The vertex is not in the graph")
 
 
-    def toMatrix(self):
-        self.adjMatrix = [0] * len(self.adjList)
-        for i in range(len(self.adjList)):
-            self.adjMatrix[i] = [0] * len(self.adjList)
+    # def toMatrix(self):
+    #     self.adjMatrix = [0] * len(self.adjList)
+    #     for i in range(len(self.adjList)):
+    #         self.adjMatrix[i] = [0] * len(self.adjList)
+    #     print("----------")
+    #     print(self.adjMatrix)
+    #     print("----------")
+    #     for vertex in self.adjList:
+    #         for edge in self.adjList[vertex]:
+    #             if self.weighted:
+    #                 self.adjMatrix[vertex][edge[0]] = edge[1]
+    #             else:
+    #                 self.adjMatrix[vertex][edge[0]] = 1 # if no weight, then 1
 
-        for vertex in self.adjList:
-            for edge in self.adjList[vertex]:
-                if self.weighted:
-                    self.adjMatrix[vertex][edge[0]] = edge[1]
-                else:
-                    self.adjMatrix[vertex][edge[0]] = 1 # if no weight, then 1
-
-    def dfs(self, start_node: int, goal: int):
+    def dfs(self, start_node, goal):
         """
         поиск в глубину
         * если вершины имеют не только целочисленную характеристику, а более сложную,
@@ -123,13 +96,17 @@ class Graph:
 
         while not next_nodes.is_empty():
             node = next_nodes.pop()  # вытаскиваем из стека вершину
-            if node == goal:  # заменить в случае *
-                print("we have find the vertex: ", end=" ")
+            print("------{}-----".format(node))
+            if node == goal:
+                print("we have found the vertex")
+                # write neighbours for check
+                print("Neighbours: ")
+                print(self.adjList[node])
                 return node
             for n in self.adjList[node]:
-                if not n in explored_nodes:
-                    next_nodes.push(n)
-                    explored_nodes.add(n)
+                if not n[0] in explored_nodes:
+                    next_nodes.push(n[0])
+                    explored_nodes.add(n[0])
         return None
 
     def __str__(self):
@@ -142,32 +119,35 @@ class Graph:
         :return: string graph
         """
         answer = ""
-        for v_index in range(len(self.adjList)):
-            VERTEX = self.adjList[v_index][0].start.value
-            answer += str(VERTEX) + ": "
-            for edge in self.adjList[v_index]:
-                if not self.weighted: # without weights
-                    if self.adjList[v_index].index(edge) != (len(self.adjList[v_index]) - 1):
-                        answer += "{} -> ".format(edge.destination.value)
+        for key, value in self.adjList.items():
+            answer += str(key) + ": "
+            if not self.weighted: # without weights
+                for edge in value:
+                    if value.index(edge) != (len(value) - 1):
+                        answer += "{} -> ".format(edge[0])
                     else:
-                        answer += "{}".format(edge.destination.value) + "\n"
-                else:
-                    if self.adjList[v_index].index(edge) != (len(self.adjList[v_index]) - 1):
-                        answer += "{} -> ".format(edge.destination.value)
+                        answer += "{}".format(edge[0]) + "\n"
+            else:
+                for edge in value:
+                    if value.index(edge) != (len(value) - 1):
+                        answer += "{} -> ".format(edge)
                     else:
-                        answer += "{}".format(edge.destination.value) + "\n"
+                        answer += "{}".format(edge) + "\n"
         return answer
 
-    def printM(self):
-        print("Matrix:")
-        for i in range(len(self.adjMatrix)):
-                print(self.adjMatrix[i])
+    # def printM(self):
+    #     print("Matrix:")
+    #     for i in range(len(self.adjMatrix)):
+    #             print(self.adjMatrix[i])
 
 if __name__ == "__main__":
     my_graph = Graph(weighted=False, directed=False)
-    my_graph.addEdge(Node("Anya"), Node("Lera"))
-    my_graph.addEdge(Node("Anya"), Node("Masha"))
-    my_graph.addEdge(Node("Lera"), Node("Tanya"))
-
-
+    my_graph.addEdge("Anya", "Masha")
+    my_graph.addEdge("Anya", "Tanya")
+    my_graph.addEdge("Masha", "Tanya")
+    my_graph.addEdge("Tanya", "Lera")
+    print(my_graph)
     print(my_graph.adjList)
+    # print("*removing vertex Tanya..")
+    # my_graph.removeVertex("Tanya")
+    print(my_graph.dfs("Lera", "Anya"))
